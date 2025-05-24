@@ -37,7 +37,7 @@ interface SelectedComponentInfo {
 interface PropertiesPanelProps {
   selectedComponent?: CanvasComponentInstance | null;
   allCanvasComponents?: CanvasComponentInstance[]; // Added to get parent info
-  onUpdateProperty: (componentId: string, propertyPath: string, value: any, breakpoint?: keyof ResponsiveStyles) => void; // Added breakpoint
+  onUpdateProperty: (componentId: string, propertyPath: string, value: unknown, breakpoint?: keyof ResponsiveStyles) => void; // Changed any to unknown
   // onCopyComponent: (componentId: string) => void;
   // onDeleteComponent: (componentId: string) => void;
 }

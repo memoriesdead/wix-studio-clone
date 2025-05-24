@@ -43,10 +43,17 @@ const BuildersPage: React.FC = () => {
   const dndLiveRegionId = useId();
   const [activeCanvasBreakpoint, setActiveCanvasBreakpoint] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
 
+  const updateHistory = useCallback((newCanvasState: CanvasComponentInstance[]) => {
+    const newHistory = history.slice(0, historyIndex + 1);
+    newHistory.push(newCanvasState);
+    setHistory(newHistory);
+    setHistoryIndex(newHistory.length - 1);
+  }, [history, historyIndex]);
+
   const handleUpdateProperty = useCallback((
     componentId: string,
     propertyPath: string,
-    value: any,
+    value: unknown, // Changed from any to unknown
     breakpoint?: keyof ResponsiveStyles
   ) => {
     setCanvasComponents(prevComponents => {
@@ -72,17 +79,10 @@ const BuildersPage: React.FC = () => {
         }
         return comp;
       });
-      updateHistory(newComponents);
+      updateHistory(newComponents); // updateHistory is now defined before this
       return newComponents;
     });
-  }, [history, historyIndex]); // Assuming updateHistory is stable or memoized if defined outside
-
-  const updateHistory = useCallback((newCanvasState: CanvasComponentInstance[]) => {
-    const newHistory = history.slice(0, historyIndex + 1);
-    newHistory.push(newCanvasState);
-    setHistory(newHistory);
-    setHistoryIndex(newHistory.length - 1);
-  }, [history, historyIndex]);
+  }, [history, historyIndex, updateHistory]); // Added updateHistory to dependency array
 
   const handleUndo = useCallback(() => {
     if (historyIndex > 0) {

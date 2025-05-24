@@ -26,7 +26,7 @@ interface BuildemiddlepageuiProps {
   onUpdateProperty: (
     componentId: string,
     propertyPath: string,
-    value: any,
+    value: unknown, // Changed from any to unknown
     breakpoint?: keyof ResponsiveStyles
   ) => void;
 }
