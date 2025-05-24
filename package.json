@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "@vercel/sdk": "^1.7.6",
+    "react-dnd": "^16.0.1",
+    "react-dnd-html5-backend": "^16.0.1"
+  }
+}
