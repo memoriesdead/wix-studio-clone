@@ -1,10 +1,4 @@
 {
-<<<<<<< HEAD
-  "dependencies": {
-    "@vercel/sdk": "^1.7.6",
-    "react-dnd": "^16.0.1",
-    "react-dnd-html5-backend": "^16.0.1"
-=======
   "name": "nextjs-shadcn",
   "version": "0.1.0",
   "private": true,
@@ -61,6 +55,5 @@
     "tailwindcss": "^3.4.1",
     "typescript": "^5",
     "vitest": "^3.1.4"
->>>>>>> f9125e07881e4abdd40f466425d9d02415217839
   }
 }
