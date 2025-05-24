@@ -1,5 +1,10 @@
-import { CanvasComponentInstance, BuilderComponentType } from './types';
-import { CSSProperties } from 'react';
+import { CanvasComponentInstance, BuilderComponentType, CSSProperties, ResponsiveStyles } from './types';
+
+// Breakpoint configuration (could be moved to a central config)
+const breakpoints = {
+  tablet: '1024px',
+  mobile: '768px',
+};
 
 /**
  * Converts a camelCased CSS property name to kebab-case.
@@ -12,81 +17,111 @@ function camelToKebab(camelCase: string): string {
 }
 
 /**
- * Generates a CSS string for a single component instance.
- * This will include converting inline styles and relevant props to CSS rules.
+ * Generates a string of CSS rules from a CSSProperties object.
+ * @param styles - The CSSProperties object.
+ * @returns A string of CSS rules, each on a new line and indented.
+ */
+function generateStyleBlock(styles?: CSSProperties): string {
+  if (!styles) return '';
+  const styleRules: string[] = [];
+  const unitlessProps = ['zIndex', 'opacity', 'fontWeight', 'lineHeight', 'flexGrow', 'flexShrink', 'order', 'orphans', 'widows', 'zoom', 'animationIterationCount', 'boxFlex', 'boxFlexGroup', 'boxOrdinalGroup', 'columnCount', 'fillOpacity', 'flex', 'gridArea', 'gridColumn', 'gridColumnEnd', 'gridColumnStart', 'gridRow', 'gridRowEnd', 'gridRowStart', 'lineClamp', 'maskBorder', 'maskBorderOutset', 'maskBorderSlice', 'maskBorderWidth', 'shapeImageThreshold', 'strokeDashoffset', 'strokeMiterlimit', 'strokeOpacity', 'strokeWidth', 'tabSize', 'webkitLineClamp', 'webkitBoxOrdinalGroup', 'webkitBoxFlex'];
+
+  for (const key in styles) {
+    if (Object.prototype.hasOwnProperty.call(styles, key)) {
+      const cssValue = (styles as Record<string, string | number | undefined>)[key];
+      const cssProp = camelToKebab(key);
+
+      if (typeof cssValue === 'string' || typeof cssValue === 'number') {
+        const valueWithUnit = typeof cssValue === 'number' && !unitlessProps.includes(key)
+          ? `${cssValue}px`
+          : cssValue;
+        styleRules.push(`  ${cssProp}: ${valueWithUnit};`);
+      }
+    }
+  }
+  return styleRules.join('\n');
+}
+
+/**
+ * Generates a CSS string for a single component instance, including responsive styles.
  * @param component - The CanvasComponentInstance to generate CSS for.
  * @returns A string containing CSS rules for this component.
  */
 export function generateCSSForComponent(component: CanvasComponentInstance): string {
-  let cssRules = '';
-  const selector = `#component-${component.id}`; // Using ID selector
+  let cssString = '';
+  const selector = `#component-${component.id}`;
 
-  // Convert component.style (CSSProperties) to CSS rules
-  const inlineStyles: string[] = [];
-  if (component.style) {
-    for (const key in component.style) {
-      if (Object.prototype.hasOwnProperty.call(component.style, key)) {
-        const styleObject = component.style as Record<string, string | number | undefined>;
-        const cssValue = styleObject[key];
-        const cssProp = camelToKebab(key);
+  // Base styles (desktop)
+  const baseStylesArray: string[] = [];
+  const desktopStyles = generateStyleBlock(component.style);
+  if (desktopStyles) {
+    baseStylesArray.push(desktopStyles);
+  }
 
-        if (typeof cssValue === 'string' || typeof cssValue === 'number') {
-          // Handle numeric values that might need 'px' (common for CSSProperties)
-          // More specific handling might be needed for unitless CSS properties
-          const unitlessProps = ['zIndex', 'opacity', 'fontWeight', 'lineHeight', 'flexGrow', 'flexShrink', 'order', 'orphans', 'widows', 'zoom', 'animationIterationCount', 'boxFlex', 'boxFlexGroup', 'boxOrdinalGroup', 'columnCount', 'fillOpacity', 'flex', 'gridArea', 'gridColumn', 'gridColumnEnd', 'gridColumnStart', 'gridRow', 'gridRowEnd', 'gridRowStart', 'lineClamp', 'maskBorder', 'maskBorderOutset', 'maskBorderSlice', 'maskBorderWidth', 'shapeImageThreshold', 'strokeDashoffset', 'strokeMiterlimit', 'strokeOpacity', 'strokeWidth', 'tabSize', 'webkitLineClamp', 'webkitBoxOrdinalGroup', 'webkitBoxFlex'];
-          const valueWithUnit = typeof cssValue === 'number' && !unitlessProps.includes(key)
-            ? `${cssValue}px`
-            : cssValue;
-          inlineStyles.push(`  ${cssProp}: ${valueWithUnit};`);
-        }
+  // Add positioning and dimensions for components not primarily controlled by a parent layout container.
+  // This logic will need to be more sophisticated. For now, if it's not a flex/grid container itself,
+  // and doesn't have a parent that dictates layout, apply absolute positioning.
+  // This is a simplification and will be refined.
+  if (component.type !== BuilderComponentType.FlexContainer && component.type !== BuilderComponentType.GridContainer && !component.parentId) {
+    baseStylesArray.push(`  position: absolute;`);
+    baseStylesArray.push(`  left: ${component.left}px;`);
+    baseStylesArray.push(`  top: ${component.top}px;`);
+  }
+  // Width and height are generally applicable, but might be overridden by flex/grid item properties.
+  // If width/height are not in component.style, use the direct properties.
+  if (!component.style?.width) baseStylesArray.push(`  width: ${component.width}px;`);
+  if (!component.style?.height) baseStylesArray.push(`  height: ${component.height}px;`);
+
+
+  // Convert relevant component.props to CSS rules (example)
+  if (component.props?.textAlign) {
+    baseStylesArray.push(`  text-align: ${component.props.textAlign};`);
+  }
+  if (component.props?.customBackgroundColor) {
+    baseStylesArray.push(`  background-color: ${component.props.customBackgroundColor};`);
+  }
+
+
+  if (baseStylesArray.length > 0) {
+    cssString += `${selector} {\n${baseStylesArray.join('\n')}\n}\n\n`;
+  }
+
+  // Responsive Styles
+  if (component.responsiveStyles) {
+    // Tablet Styles
+    if (component.responsiveStyles.tablet) {
+      const tabletStyleBlock = generateStyleBlock(component.responsiveStyles.tablet);
+      if (tabletStyleBlock) {
+        cssString += `@media (max-width: ${breakpoints.tablet}) {\n`;
+        cssString += `  ${selector} {\n${tabletStyleBlock}\n  }\n`;
+        cssString += `}\n\n`;
+      }
+    }
+    // Mobile Styles
+    if (component.responsiveStyles.mobile) {
+      const mobileStyleBlock = generateStyleBlock(component.responsiveStyles.mobile);
+      if (mobileStyleBlock) {
+        cssString += `@media (max-width: ${breakpoints.mobile}) {\n`;
+        cssString += `  ${selector} {\n${mobileStyleBlock}\n  }\n`;
+        cssString += `}\n\n`;
       }
     }
   }
 
-  // Convert relevant component.props to CSS rules (e.g., text-align, custom colors not in style)
-  // This part will expand based on how props are used for styling in PropertiesPanel
-  // Example: if component.props.textAlign is used
-  if (component.props.textAlign) {
-    inlineStyles.push(`  text-align: ${component.props.textAlign};`);
-  }
-  // Example: if component.props.customBackgroundColor is used
-  if (component.props.customBackgroundColor) {
-    inlineStyles.push(`  background-color: ${component.props.customBackgroundColor};`);
-  }
-
-  // Add absolute positioning and dimensions
-  // TODO: This is where the responsive conversion logic will be critical.
-  // For V1, we'll stick to absolute positioning within a fixed container.
-  inlineStyles.push(`  position: absolute;`);
-  inlineStyles.push(`  left: ${component.left}px;`);
-  inlineStyles.push(`  top: ${component.top}px;`);
-  inlineStyles.push(`  width: ${component.width}px;`);
-  inlineStyles.push(`  height: ${component.height}px;`);
-  if (component.style?.zIndex !== undefined) {
-    inlineStyles.push(`  z-index: ${component.style.zIndex};`);
-  }
-
-
-  if (inlineStyles.length > 0) {
-    cssRules += `${selector} {\n${inlineStyles.join('\n')}\n}\n\n`;
-  }
-
-  return cssRules;
+  return cssString;
 }
 
 /**
- * Consolidates CSS for all components on a page.
- * @param allComponentsOnPage - Array of all CanvasComponentInstance on the page.
- * @returns An object containing globalCss and componentCss strings.
+ * Consolidates CSS for all components.
+ * @param allComponents - Array of all CanvasComponentInstance.
+ * @returns An object containing componentCss string.
  */
-export function consolidateStyles(allComponentsOnPage: CanvasComponentInstance[]): { componentCss: string } {
-  let componentCss = '';
+export function consolidateStyles(allComponents: CanvasComponentInstance[]): { componentCss: string } {
+  let componentCss = '/* Component-specific styles */\n\n';
 
-  allComponentsOnPage.forEach(component => {
+  allComponents.forEach(component => {
     componentCss += generateCSSForComponent(component);
   });
 
-  // globalCss will be handled separately, likely by copying/processing existing globals.css
-  // and running Tailwind on generated HTML.
   return { componentCss };
 }

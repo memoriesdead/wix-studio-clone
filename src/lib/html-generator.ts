@@ -44,8 +44,8 @@ export function generateHTMLForComponent(node: ComponentTreeNode, allPages: Page
   const component = node.component;
   const props = component.props || {};
   const id = `component-${component.id}`;
-  // Intend to get className from props if it exists, otherwise empty string
-  const className = typeof props.className === 'string' ? props.className : '';
+  // Use component.className directly if it exists, otherwise fallback to props.className or empty string
+  const userClassName = component.className || (typeof props.className === 'string' ? props.className : '');
 
 
   let childrenHTML = '';
@@ -57,45 +57,59 @@ export function generateHTMLForComponent(node: ComponentTreeNode, allPages: Page
 
   switch (component.type) {
     case BuilderComponentType.Text:
-      elementHTML = `<p id="${id}" class="${className}" data-component-type="${component.type}">${props.text || ''}</p>`;
+      elementHTML = `<p id="${id}" class="${userClassName}" data-component-type="${component.type}">${props.text || ''}</p>`;
       break;
     case BuilderComponentType.Heading:
-      // Assuming props.level (e.g., 1 for h1, 2 for h2) exists or defaulting to h2
       const level = props.level || 2;
-      elementHTML = `<h${level} id="${id}" class="${className}" data-component-type="${component.type}">${props.text || ''}</h${level}>`;
+      elementHTML = `<h${level} id="${id}" class="${userClassName}" data-component-type="${component.type}">${props.text || ''}</h${level}>`;
       break;
     case BuilderComponentType.Image:
-      // TODO: Asset processing will update src to point to the new path in 'assets/images/'
-      // For now, using props.src directly. Alt text from props.alt.
-      elementHTML = `<img id="${id}" class="${className}" src="${props.src || ''}" alt="${props.alt || component.name}" data-component-type="${component.type}" />`;
+      elementHTML = `<img id="${id}" class="${userClassName}" src="${props.src || ''}" alt="${props.alt || component.name}" data-component-type="${component.type}" />`;
       break;
     case BuilderComponentType.Button:
-      // TODO: Handle link resolution using allPages for internal links
       const href = props.link || '#';
-      const target = props.target || '_self'; // e.g., _blank for new tab
-      elementHTML = `<a id="${id}" href="${href}" target="${target}" class="button ${className}" data-component-type="${component.type}" role="button">${props.text || 'Button'}</a>`;
-      // Or use <button> if it's not a link:
-      // elementHTML = `<button id="${id}" class="button ${className}" data-component-type="${component.type}">${props.text || 'Button'}</button>`;
+      const target = props.target || '_self';
+      // Added a base "button" class for default button styling, userClassName for overrides/additions
+      elementHTML = `<a id="${id}" href="${href}" target="${target}" class="button ${userClassName}" data-component-type="${component.type}" role="button">${props.text || 'Button'}</a>`;
       break;
     case BuilderComponentType.Container:
     case BuilderComponentType.Section:
     case BuilderComponentType.Columns:
     case BuilderComponentType.Grid:
-      elementHTML = `<div id="${id}" class="${className}" data-component-type="${component.type}">\n    ${childrenHTML}\n</div>`;
+    case BuilderComponentType.FlexContainer: // Added FlexContainer
+    case BuilderComponentType.GridContainer: // Added GridContainer
+      elementHTML = `<div id="${id}" class="${userClassName}" data-component-type="${component.type}">\n    ${childrenHTML}\n</div>`;
       break;
     case BuilderComponentType.Divider:
-      elementHTML = `<hr id="${id}" class="${className}" data-component-type="${component.type}" />`;
+      elementHTML = `<hr id="${id}" class="${userClassName}" data-component-type="${component.type}" />`;
       break;
     case BuilderComponentType.Spacer:
-      elementHTML = `<div id="${id}" class="spacer ${className}" data-component-type="${component.type}" style="height: ${props.height || '20'}px;"></div>`; // Height from props
+      // Added a base "spacer" class
+      elementHTML = `<div id="${id}" class="spacer ${userClassName}" data-component-type="${component.type}" style="height: ${props.height || '20'}px;"></div>`;
       break;
     case BuilderComponentType.Icon:
-      // Icon handling would be more complex, potentially involving SVG strings or font icons
-      elementHTML = `<div id="${id}" class="icon ${className}" data-component-type="${component.type}"><!-- Icon: ${props.iconName || 'default'} --></div>`;
+      // Added a base "icon" class
+      elementHTML = `<div id="${id}" class="icon ${userClassName}" data-component-type="${component.type}"><!-- Icon: ${props.iconName || 'default'} --></div>`;
+      break;
+    case BuilderComponentType.Video:
+      const videoSrc = typeof props.src === 'string' ? props.src : '';
+      const videoWidth = typeof component.style?.width === 'string' || typeof component.style?.width === 'number' ? component.style.width : (component.width || 300);
+      const videoHeight = typeof component.style?.height === 'string' || typeof component.style?.height === 'number' ? component.style.height : (component.height || 200);
+      if (videoSrc) {
+        // Basic YouTube embed URL transformation
+        const embedSrc = videoSrc.includes('youtube.com/watch?v=') 
+          ? videoSrc.replace('watch?v=', 'embed/') 
+          : videoSrc.includes('youtu.be/')
+            ? videoSrc.replace('youtu.be/', 'youtube.com/embed/')
+            : videoSrc; // Assume other URLs might be directly embeddable or require different logic
+
+        elementHTML = `<iframe id="${id}" class="video-iframe ${userClassName}" width="${videoWidth}" height="${videoHeight}" src="${embedSrc}" title="${component.name}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen data-component-type="${component.type}"></iframe>`;
+      } else {
+        elementHTML = `<div id="${id}" class="video-placeholder ${userClassName}" style="width:${videoWidth}px; height:${videoHeight}px; background-color:#ccc; display:flex; align-items:center; justify-content:center;" data-component-type="${component.type}"><span>Video Placeholder</span></div>`;
+      }
       break;
     default:
-      // Generic div for unknown or simple wrapper components
-      elementHTML = `<div id="${id}" class="${className}" data-component-type="${component.type}">
+      elementHTML = `<div id="${id}" class="${userClassName}" data-component-type="${component.type}">
   <!-- ${component.name} (${component.type}) -->
   ${props.text || ''}
   ${childrenHTML}

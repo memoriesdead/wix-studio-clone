@@ -138,9 +138,9 @@ const availablePaletteItems: PaletteItem[] = [
 ];
 
 // Props for search, categories, etc. will be added later
-type ComponentPaletteProps = Record<string, never>; 
+type PrototiesProps = Record<string, never>; 
 
-const ComponentPalette: React.FC<ComponentPaletteProps> = () => {
+const Prototies: React.FC<PrototiesProps> = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState<string>("All"); // "All", "Layout", "Forms", "Media"
   const [gridLayout, setGridLayout] = useState(true); // Default to grid view
@@ -234,4 +234,4 @@ const ComponentPalette: React.FC<ComponentPaletteProps> = () => {
   );
 };
 
-export default ComponentPalette;
+export default Prototies;

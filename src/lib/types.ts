@@ -1,4 +1,7 @@
-import { CSSProperties } from 'react';
+import type { CSSProperties as ReactCSSProperties } from 'react';
+
+// Re-export CSSProperties to be used by other modules
+export type CSSProperties = ReactCSSProperties;
 
 // Defines the types of components available in the builder
 // This will expand significantly based on the "Component Palette Features"
@@ -14,7 +17,18 @@ export enum BuilderComponentType {
   Spacer = 'spacer',
   Columns = 'columns',
   Grid = 'grid',
+  FlexContainer = 'flexContainer', // New type for flexbox layouts
+  GridContainer = 'gridContainer', // New type for CSS grid layouts (distinct from simple 'Grid' if 'Grid' was for data)
+  Video = 'video', // New Video component type
   // Add more types as specified in the prompt
+}
+
+// Defines responsive styles for different breakpoints
+export interface ResponsiveStyles {
+  desktop?: CSSProperties; // Default styles, can also be the main 'style' prop
+  tablet?: CSSProperties;
+  mobile?: CSSProperties;
+  // Add more breakpoints as needed, e.g., laptop, wideScreen
 }
 
 // Base properties common to all components
@@ -32,6 +46,12 @@ export interface PaletteItem extends BaseComponentProps {
   // Any other default properties specific to the component type
   // e.g., defaultText for a Text component
   defaultProps?: Record<string, unknown>;
+  description?: string;
+  category?: string;
+  icon?: React.ElementType; // Or string if icon names are used
+  tags?: string[];
+  isPopular?: boolean;
+  isNew?: boolean;
 }
 
 // Properties for a component instance placed on the canvas
@@ -43,8 +63,15 @@ export interface CanvasComponentInstance extends BaseComponentProps {
   height: number;
   parentId?: string | null; // For nesting components
   props: Record<string, unknown>; // Component-specific properties (e.g., text content, image URL, button style)
-  style?: CSSProperties; // General CSS styles applied directly
-  // TODO: Add fields for responsive settings, animations, etc.
+  style?: CSSProperties; // General CSS styles applied directly (these can be considered desktop/default styles)
+  className?: string; // For user-added Tailwind or custom CSS classes
+  responsiveStyles: ResponsiveStyles; // Styles for different breakpoints - making this non-optional
+  isLocked?: boolean;
+  isVisible?: boolean;
+  rotation?: number;
+  zIndex?: number;
+  isExpanded?: boolean; // For components like accordions or layer groups
+  // TODO: Add fields for animations, etc.
 }
 
 // Union type for any component data within the builder
