@@ -56,7 +56,7 @@ const VercelConnection: React.FC = () => {
     }
 
 
-  }, []); // Empty dependency array: run once on mount
+  }, [isConnected]); // Added isConnected to dependency array
 
   const handleConnect = () => {
     // Redirect to the backend route that initiates Vercel OAuth

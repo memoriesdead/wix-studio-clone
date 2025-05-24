@@ -75,7 +75,7 @@ const DraggablePaletteItem: React.FC<DraggablePaletteItemProps> = ({ item, gridL
             <IconComponent className="w-4 h-4 text-white" />
           </div>
           <h4 className="text-theme-text-primary text-sm font-medium mb-1 truncate">{item.name}</h4>
-          <p className="text-theme-text-muted text-xs truncate">{item.defaultProps?.description || `Draggable ${item.type}`}</p>
+          <p className="text-theme-text-muted text-xs truncate">{(item.defaultProps?.description as string) || `Draggable ${item.type}`}</p>
           <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
             <div className={`w-2 h-2 bg-${item.type === BuilderComponentType.Text ? 'blue-400' : item.type === BuilderComponentType.Heading ? 'purple-400' : 'gray-400'} rounded-full`}></div>
           </div>
@@ -100,7 +100,7 @@ const DraggablePaletteItem: React.FC<DraggablePaletteItemProps> = ({ item, gridL
           </div>
           <div className="flex-1">
             <h4 className="text-theme-text-primary font-semibold">{item.name}</h4>
-            <p className="text-theme-text-muted text-xs">{item.defaultProps?.description || `Draggable ${item.type} component`}</p>
+            <p className="text-theme-text-muted text-xs">{(item.defaultProps?.description as string) || `Draggable ${item.type} component`}</p>
           </div>
           <div className="text-theme-accent-primary opacity-0 group-hover:opacity-100 transition-opacity">
             <ChevronRight className="w-4 h-4" />
@@ -127,9 +127,8 @@ const availablePaletteItems: PaletteItem[] = [
   { id: 'grd', type: BuilderComponentType.Grid, name: 'Grid', isPaletteItem: true, defaultWidth: 300, defaultHeight: 200, defaultProps: { description: "CSS Grid structure" } },
 ];
 
-interface ComponentPaletteProps {
-  // Props for search, categories, etc. will be added later
-}
+// Props for search, categories, etc. will be added later
+type ComponentPaletteProps = Record<string, never>; 
 
 const ComponentPalette: React.FC<ComponentPaletteProps> = () => {
   const [searchTerm, setSearchTerm] = useState("");

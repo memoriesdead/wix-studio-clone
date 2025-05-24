@@ -31,7 +31,7 @@ export interface PaletteItem extends BaseComponentProps {
   defaultHeight?: number | string; // Default height when dropped on canvas (can be % or px)
   // Any other default properties specific to the component type
   // e.g., defaultText for a Text component
-  defaultProps?: Record<string, any>;
+  defaultProps?: Record<string, unknown>;
 }
 
 // Properties for a component instance placed on the canvas
@@ -42,7 +42,7 @@ export interface CanvasComponentInstance extends BaseComponentProps {
   width: number;
   height: number;
   parentId?: string | null; // For nesting components
-  props: Record<string, any>; // Component-specific properties (e.g., text content, image URL, button style)
+  props: Record<string, unknown>; // Component-specific properties (e.g., text content, image URL, button style)
   style?: CSSProperties; // General CSS styles applied directly
   // TODO: Add fields for responsive settings, animations, etc.
 }

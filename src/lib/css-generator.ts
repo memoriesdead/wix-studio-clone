@@ -26,13 +26,15 @@ export function generateCSSForComponent(component: CanvasComponentInstance): str
   if (component.style) {
     for (const key in component.style) {
       if (Object.prototype.hasOwnProperty.call(component.style, key)) {
+        const styleObject = component.style as Record<string, string | number | undefined>;
+        const cssValue = styleObject[key];
         const cssProp = camelToKebab(key);
-        // Ensure value is a string or number; handle potential issues with complex values if any
-        const cssValue = (component.style as any)[key];
+
         if (typeof cssValue === 'string' || typeof cssValue === 'number') {
           // Handle numeric values that might need 'px' (common for CSSProperties)
           // More specific handling might be needed for unitless CSS properties
-          const valueWithUnit = typeof cssValue === 'number' && !['zIndex', 'opacity', 'fontWeight', 'lineHeight', 'flexGrow', 'flexShrink', 'order'].includes(key)
+          const unitlessProps = ['zIndex', 'opacity', 'fontWeight', 'lineHeight', 'flexGrow', 'flexShrink', 'order', 'orphans', 'widows', 'zoom', 'animationIterationCount', 'boxFlex', 'boxFlexGroup', 'boxOrdinalGroup', 'columnCount', 'fillOpacity', 'flex', 'gridArea', 'gridColumn', 'gridColumnEnd', 'gridColumnStart', 'gridRow', 'gridRowEnd', 'gridRowStart', 'lineClamp', 'maskBorder', 'maskBorderOutset', 'maskBorderSlice', 'maskBorderWidth', 'shapeImageThreshold', 'strokeDashoffset', 'strokeMiterlimit', 'strokeOpacity', 'strokeWidth', 'tabSize', 'webkitLineClamp', 'webkitBoxOrdinalGroup', 'webkitBoxFlex'];
+          const valueWithUnit = typeof cssValue === 'number' && !unitlessProps.includes(key)
             ? `${cssValue}px`
             : cssValue;
           inlineStyles.push(`  ${cssProp}: ${valueWithUnit};`);

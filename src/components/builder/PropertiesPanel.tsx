@@ -48,7 +48,7 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
   // const componentTypeIcon = selectedComponent ? Type : Type; // Default icon, map to actual icons later
   // This will be replaced by IconForSelected
 
-  const handlePropertyChange = (propName: string, value: any) => {
+  const handlePropertyChange = (propName: string, value: unknown) => {
     // if (selectedComponent && onUpdateProperty) {
     //   onUpdateProperty(selectedComponent.id, propName, value);
     // }
@@ -153,7 +153,7 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                   className="w-full bg-theme-bg-secondary border border-theme-border-primary rounded-lg px-3 py-2 text-theme-text-primary placeholder-theme-text-muted focus:border-theme-accent-primary focus:ring-1 focus:ring-theme-accent-primary transition-all resize-none"
                   rows={3}
                   placeholder="Enter your text..."
-                  value={currentProperties.text || ''}
+                  value={(currentProperties.text as string) || ''}
                   onChange={(e) => handlePropertyChange('text', e.target.value)}
                   aria-label="Text Content"
                 />
@@ -175,7 +175,7 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                     <div className="relative">
                       <select 
                         className="w-full bg-theme-bg-secondary border border-theme-border-primary rounded-lg px-3 py-2.5 text-theme-text-primary focus:border-theme-accent-primary focus:ring-1 focus:ring-theme-accent-primary transition-all appearance-none"
-                        value={currentProperties.fontFamily || 'Inter'}
+                        value={(currentProperties.fontFamily as string) || 'Inter'}
                         onChange={(e) => handlePropertyChange('fontFamily', e.target.value)}
                         aria-label="Font Family"
                       >
@@ -193,7 +193,7 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                         id="fontSizeInput"
                         type="number"
                         className="w-full bg-theme-bg-secondary border border-theme-border-primary rounded-lg px-3 py-2 text-theme-text-primary focus:border-theme-accent-primary"
-                        value={currentProperties.fontSize || 16}
+                        value={(currentProperties.fontSize as number) || 16}
                         onChange={(e) => handlePropertyChange('fontSize', parseInt(e.target.value,10))}
                       />
                     </div>
@@ -202,7 +202,7 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                       <select 
                         id="fontWeightSelect"
                         className="w-full bg-theme-bg-secondary border border-theme-border-primary rounded-lg px-3 py-2 text-theme-text-primary focus:border-theme-accent-primary appearance-none"
-                        value={currentProperties.fontWeight || 400}
+                        value={(currentProperties.fontWeight as number) || 400}
                         onChange={(e) => handlePropertyChange('fontWeight', parseInt(e.target.value,10))}
                       >
                         <option value="300">300</option>
@@ -225,11 +225,11 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-theme-text-muted">Text Color</span>
                     <div className="flex items-center space-x-2">
-                      <div className="w-6 h-6 rounded cursor-pointer border-2 border-theme-border-hover" style={{backgroundColor: currentProperties.color || '#ffffff'}}></div>
+                      <div className="w-6 h-6 rounded cursor-pointer border-2 border-theme-border-hover" style={{backgroundColor: (currentProperties.color as string) || '#ffffff'}}></div>
                       <input
                         type="text"
                         className="w-24 bg-theme-bg-secondary border border-theme-border-primary rounded px-2 py-1 text-xs text-theme-text-primary"
-                        value={currentProperties.color || '#FFFFFF'}
+                        value={(currentProperties.color as string) || '#FFFFFF'}
                         onChange={(e) => handlePropertyChange('color', e.target.value)}
                         aria-label="Text Color Hex Value"
                       />
@@ -238,11 +238,11 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-theme-text-muted">Background</span>
                     <div className="flex items-center space-x-2">
-                       <div className="w-6 h-6 rounded cursor-pointer border-2 border-theme-border-hover" style={{backgroundColor: currentProperties.backgroundColor || 'transparent'}} title="Pick Background Color"></div>
+                       <div className="w-6 h-6 rounded cursor-pointer border-2 border-theme-border-hover" style={{backgroundColor: (currentProperties.backgroundColor as string) || 'transparent'}} title="Pick Background Color"></div>
                       <input
                         type="text"
                         className="w-24 bg-theme-bg-secondary border border-theme-border-primary rounded px-2 py-1 text-xs text-theme-text-primary"
-                        value={currentProperties.backgroundColor || 'transparent'}
+                        value={(currentProperties.backgroundColor as string) || 'transparent'}
                         onChange={(e) => handlePropertyChange('backgroundColor', e.target.value)}
                         aria-label="Background Color Hex Value"
                       />
